@@ -1,0 +1,69 @@
+# ConnectX cluster policy (authored from discovery report.json)
+# Device: gfx942 (CDNA3), runtime ROCm 7.0.5 (runtime=70051831)
+# test,class,when,expected,ticket,reason
+test,class,when,expected,ticket,reason
+Capture_Dependency_Update_Chain,MUST_PASS,,,,
+Ce_BatchCopy_Ordered,MUST_PASS,rocm>=7.12,,,requires hipMemcpyBatchAsync (ROCm >= 7.12)
+DeviceSetLimit_StackSize,MUST_PASS,,,,
+Device_Attr_Probe,MUST_PASS,,,,
+Device_CanAccessPeer_Matrix,MUST_PASS,,,,
+Device_P2P_AllPairs_Copy,MUST_PASS,,,,
+Device_MemcpyPeer_Latency,MUST_PASS,,,,sync hipMemcpyPeer latency on first peer pair; skips on single-GPU nodes
+Device_Query_Basics,MUST_PASS,,,,
+Device_Reset_Mgmt,MUST_PASS,,,,
+DriverEntryPoint_Resolve,MUST_PASS,,,,
+Event_DisableTiming_CrossStream_Sync,MUST_PASS,,,,
+Event_Timing_Query_Elapsed,MUST_PASS,,,,
+ExtMalloc_FineGrain,MUST_PASS,,,,
+GetFuncBySymbol_Resolve,MUST_PASS,,,,
+Graph_Capture_AddHostNode,MUST_PASS,,,,
+Hdp_Flush_Ordering,NA,,,,gfx<90a only; this is gfx942 CDNA3
+HipMalloc_Free_Integrity,MUST_PASS,,,,
+HostAlloc_Pinned,MUST_PASS,,,,
+HostMalloc_Mapped_Uncached_DevPtr,MUST_PASS,,,,
+HostRegister_Mapped_Uncached,MUST_PASS,,,,
+Hsa_MemoryPool_LockHostToPool,MUST_PASS,,,,
+Ipc_Legacy_GetOpen_RoundTrip,MUST_PASS,,,,
+Kernel_LaunchVariants_Smoke,MUST_PASS,,,,
+Kernel_Launch_DynShared_LastError,MUST_PASS,,,,
+LaunchHostFunc_StreamCallback,MUST_PASS,,,,
+LaunchKernelEx_ClusterAttrs,MUST_PASS,,,,
+Launch_DynShared_FuncAttr,MUST_PASS,,,,
+MallocAsync_FreeAsync,MUST_PASS,,,,
+MallocManaged_Access,MUST_PASS,,,,
+MemPool_Alloc,MUST_PASS,,,,
+MemPool_SetAttribute,MUST_PASS,,,,
+Mem_Advise_Info,MUST_PASS,,,,
+Memcpy_D2D_Async,MUST_PASS,,,,
+Memcpy_D2D_Sync,MUST_PASS,,,,
+Memcpy_D2H_Async,MUST_PASS,,,,
+Memcpy_D2H_Sync,MUST_PASS,,,,
+Memcpy_H2D_Async,MUST_PASS,,,,
+Memcpy_H2D_Sync,MUST_PASS,,,,
+Memcpy_Size_Sweep,MUST_PASS,,,,
+Memcpy_Symbol,MUST_PASS,,,,
+Memset_Async,MUST_PASS,,,,
+Memset_Sync,MUST_PASS,,,,
+Module_GetGlobal_Resolve,MUST_PASS,,,,
+Module_Load_Launch_Lifecycle,MUST_PASS,,,,
+Occupancy_Query,MUST_PASS,,,,
+PointerGetAttributes_DeviceVsHost,KNOWN_FAILURE,,fail,ROCM-2696,hipMemGetAddressRange SIGSEGV on NULL out-param (ROCm 7.0.x)
+StreamBatchMemOp_WriteValue,MUST_PASS,rocm>=7.12,,,requires hipStreamBatchMemOp (ROCm >= 7.12)
+StreamCaptureMode_Exchange,MUST_PASS,,,,
+StreamGetId_Stable,MUST_PASS,rocm>=7.1,,,requires hipStreamGetId (ROCm >= 7.1)
+Stream_Create_Flags_Lifecycle,MUST_PASS,,,,
+Symbol_Version_Detection,MUST_PASS,,,,
+Texture_Object_Lifecycle,NA,,,,no image hw on CDNA3+ (gfx942)
+Vmm_Create_Map_Roundtrip,MUST_PASS,,,,
+Vmm_Fabric_Export_Import,MUST_PASS,rocm>=7.12,,,requires hipMemHandleTypeFabric (ROCm >= 7.12)
+Vmm_Fabric_Import_D2D_Copy,MUST_PASS,rocm>=7.12,,,requires hipMemHandleTypeFabric (ROCm >= 7.12)
+Vmm_GPUDirectRdmaVmm_Attribute,MUST_PASS,rocm>=7.2,,ROCM-2550,requires hipDeviceAttributeGPUDirectRDMAWithHipVMMSupported (ROCm >= 7.2)
+Vmm_GpuDirectRDMACapable_MultiMap,MUST_PASS,,,,
+Vmm_Granularity,MUST_PASS,,,,
+Vmm_Map_NoDeadlock_KernelInFlight,KNOWN_FAILURE,,fail,ROCM-25387,hipMemMap behind in-flight null-stream kernel
+Vmm_Negative_ZeroSize_Unaligned,MUST_PASS,,,,
+Vmm_PosixFd_Export_Import,MUST_PASS,,,,
+Vmm_PosixFd_Import_D2D_Copy,MUST_PASS,,,,
+Vmm_RDMA_MultiMap_NoFlag,MUST_PASS,,,,
+Vmm_SetGetAccess,MUST_PASS,,,,
+Vmm_Uncached_Type,MUST_PASS,,,,

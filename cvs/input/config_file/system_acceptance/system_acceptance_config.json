@@ -1,0 +1,32 @@
+{
+    "system_acceptance": {
+        "build": {
+            "_comment": "Phase 1 — install_system_acceptance.py uploads the vendored harness tree (cvs/tests/system_acceptance/src/) to the nodes via SFTP and builds it there. No git clone. Skip this phase if you deploy a prebuilt binary or a container image.",
+            "install_dir": "/home/{user-id}/system_acceptance",
+            "_comment_install_dir": "Staging root on each node; the vendored tree lands here and is built in place (binary ends up at <install_dir>/build/system_acceptance).",
+            "arches": [],
+            "_comment_arches": "gfx targets for the static kernels (e.g. [\"gfx942\"]). Empty = auto-detect via rocminfo on each node.",
+            "rocm_dir": "",
+            "_comment_rocm_dir": "ROCm prefix for CMAKE_PREFIX_PATH. Empty = /opt/rocm.",
+            "build_type": "Release",
+            "nfs_install": false,
+            "_comment_nfs_install": "true = upload+build once on the head node (shared filesystem); false = on every node.",
+            "build_timeout": 3600
+        },
+
+        "bin_path": "/home/{user-id}/system_acceptance/build/system_acceptance",
+        "_comment_bin_path": "Absolute path to the binary on each node. With build-on-node this is <install_dir>/build/system_acceptance; with a prebuilt/container deploy, point it wherever the binary lives.",
+        "policy": "<changeme>",
+        "_comment_policy": "Absolute path on the node to the policy CSV (e.g. <install_dir>/policy/mi350_ionic.csv).",
+        "vendor": "",
+        "_comment_vendor": "Optional NIC vendor hint for policy auto-selection (e.g. bnxt_re, ionic). Empty = auto-detect.",
+        "kind": "func",
+        "report_path": "/tmp/system_acceptance_report.json",
+        "gid_index": "",
+        "rdma_device": "",
+        "hip_timeout": 1800,
+        "verbs_timeout": 1800,
+        "two_node": false,
+        "extra_args": []
+    }
+}
