@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "extends": "health_status_base",
+  "profile_id": "hva_cvs_rundeck",
+  "suite_id": "hva_cvs",
+  "report_basename": "hva_run_deck",
+  "title": "HIP/Verbs Acceptance Run Deck",
+  "subtitle": "hva · HIP runtime and RDMA verbs functional tests across the cluster",
+  "footer": "CVS hva · render-only · per-node verdict from each hva report.json (pass / fail)",
+  "link_name": "HIP/Verbs Acceptance Run Deck",
+  "sources": {
+    "results": "hva_res_dict"
+  },
+  "lifecycle": {
+    "session_labels": [
+      "hip",
+      "verbs"
+    ]
+  }
+}

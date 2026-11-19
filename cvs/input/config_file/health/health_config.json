@@ -132,5 +132,18 @@
                 "fail_regex_pattern": "\\[ERROR\\s*\\]|RVS-ERROR"
             }
         ]
+    },
+    "hip_verbs_acceptance": {
+        "path": "/home/{user-id}/INSTALL/hip-verbs-acceptance",
+        "git_url": "https://github.com/ROCm/hip-verbs-acceptance.git",
+        "git_tag": "v0.1.0",
+        "_comment_rocm_path": "ROCm tree whose lib/ holds libamdhip64. Leave empty to use the newest /opt/rocm/core-* or /opt/rocm.",
+        "rocm_path": "",
+        "_comment_policy": "Policy CSV: empty lets hva pick <gpu>_<nic>.csv for the node, else runs every test as must-pass. Set a file name under the installed policy/ directory or an absolute path to override.",
+        "policy": "",
+        "_comment_allow_known_failures": "When true, a test that fails exactly as its policy KNOWN_FAILURE entry expects is reported but does not fail the node.",
+        "allow_known_failures": true,
+        "hip_timeout": 1800,
+        "verbs_timeout": 1800
     }
 }

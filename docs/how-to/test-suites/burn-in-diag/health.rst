@@ -208,6 +208,43 @@ Run the RVS test:
        --config_file ~/cvs_workspace/health/health_config.json \
        --capture=tee-sys -vvv -s
 
+HIP/Verbs Acceptance
+~~~~~~~~~~~~~~~~~~~~
+
+`HIP/Verbs Acceptance <https://github.com/ROCm/hip-verbs-acceptance>`_ (hva) runs functional tests of the HIP runtime on every node and of RDMA verbs between pairs of nodes. The verbs tests are launched from the first node of each pair and reach the second over SSH at its ``vpc_ip``, so the nodes need passwordless SSH to each other. A single-node cluster runs both verbs ranks on that node. Building hva needs ``cmake`` and a C++ compiler on every node.
+
+You can list the hva tests using the CLI:
+
+.. code:: bash
+
+  cvs list hva_cvs
+
+.. code:: text
+
+  Available tests in hva_cvs:
+    - test_hva_hip
+    - test_hva_verbs
+
+Run the HIP/Verbs Acceptance test:
+
+1. Run the installation:
+
+   .. code:: bash
+
+     cvs run install_hva \
+       --cluster_file ~/cvs_workspace/cluster.json \
+       --config_file ~/cvs_workspace/health/health_config.json \
+       --capture=tee-sys -vvv -s
+
+2. Start the HIP/Verbs Acceptance test:
+
+   .. code:: bash
+
+     cvs run hva_cvs \
+       --cluster_file ~/cvs_workspace/cluster.json \
+       --config_file ~/cvs_workspace/health/health_config.json \
+       --capture=tee-sys -vvv -s
+
 Run on managed compute
 ~~~~~~~~~~~~~~~~~~~~~~
 

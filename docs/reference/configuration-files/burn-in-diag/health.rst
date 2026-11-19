@@ -1,5 +1,5 @@
 .. meta::
-  :description: Reference for the CVS health test configuration file, covering AGFHC, TransferBench, and RVS burn-in parameters for AMD GPU cluster validation.
+  :description: Reference for the CVS health test configuration file, covering AGFHC, TransferBench, RVS, and HIP/Verbs Acceptance parameters for AMD GPU cluster validation.
   :keywords: CVS, health, AGFHC, TransferBench, RVS, ROCm, GPU, burn-in, AMD Instinct, configuration, JSON, benchmark
 
 ***************************************************************************
@@ -146,6 +146,17 @@ See :doc:`/how-to/test-suites/burn-in-diag/health` for more information on runni
                     "fail_regex_pattern": "\\[ERROR\\s*\\]|RVS-ERROR"
                 }
             ]
+        },
+        "hip_verbs_acceptance":
+        {
+            "path": "/home/{user-id}/INSTALL/hip-verbs-acceptance",
+            "git_url": "https://github.com/ROCm/hip-verbs-acceptance.git",
+            "git_tag": "v0.1.0",
+            "rocm_path": "",
+            "policy": "",
+            "allow_known_failures": true,
+            "hip_timeout": 1800,
+            "verbs_timeout": 1800
         }
 
     }
@@ -418,3 +429,40 @@ RVS configuration parameters and their defaults are listed below.
    * - ``fail_regex_pattern``
      - ``\\[ERROR\\s*\\]|RVS-ERROR``
      - Failure expression
+
+HIP/Verbs Acceptance
+--------------------
+
+HIP/Verbs Acceptance configuration parameters live in the ``hip_verbs_acceptance`` block. Their defaults are listed below.
+
+.. list-table::
+   :widths: 3 3 5
+   :header-rows: 1
+
+   * - Configuration parameters
+     - Default values
+     - Description
+   * - ``path``
+     - ``/home/{user-id}/INSTALL/hip-verbs-acceptance``
+     - Directory hva is cloned into. ``install_hva`` replaces it and installs hva under ``<path>/install``. Two-node verbs runs need hva at the same path on every node.
+   * - ``git_url``
+     - `https://github.com/ROCm/hip-verbs-acceptance.git <https://github.com/ROCm/hip-verbs-acceptance.git>`_
+     - URL for Git repo
+   * - ``git_tag``
+     - ``v0.1.0``
+     - Required. hva release tag to install; the installed ``hva --version`` must match it.
+   * - ``rocm_path``
+     - ``""``
+     - ROCm tree whose ``lib/`` holds ``libamdhip64``. Empty uses the newest ``/opt/rocm/core-*``, else ``/opt/rocm``.
+   * - ``policy``
+     - ``""``
+     - hva policy CSV. Empty lets hva pick the policy for the node's GPU and NIC, and run every test as must-pass when there is none. A file name is looked up in the installed ``policy/`` directory; an absolute path is used as is.
+   * - ``allow_known_failures``
+     - ``true``
+     - When ``true``, a test that fails exactly as its policy ``KNOWN_FAILURE`` entry expects is reported with its ticket but does not fail the node.
+   * - ``hip_timeout``
+     - ``1800``
+     - Timeout in seconds for the HIP tests on each node
+   * - ``verbs_timeout``
+     - ``1800``
+     - Timeout in seconds for the verbs tests of one node pair
