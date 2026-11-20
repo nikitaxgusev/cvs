@@ -6,6 +6,7 @@ Install HIP/Verbs Acceptance (hva) on every node from a pinned release tag.
 '''
 
 import json
+import uuid
 
 import pytest
 
@@ -52,9 +53,23 @@ def _fail_nodes(out_dict, step):
     return failed
 
 
+def _install_hosts(orch, path):
+    """Head node plus every node that does not share ``path`` with it."""
+    token = uuid.uuid4().hex
+    orch.exec(hva_lib.share_mark_cmd(path, token), hosts=[orch.head_node], timeout=60)
+    try:
+        check_out = orch.exec(hva_lib.share_check_cmd(path, token), timeout=60)
+    finally:
+        orch.exec(hva_lib.share_clear_cmd(path, token), hosts=[orch.head_node], timeout=60)
+    return hva_lib.install_hosts(orch.hosts, orch.head_node, check_out)
+
+
 def test_install_hva(orch, config_dict):
     """
     Clone hva at ``git_tag``, build and install it under ``path`` on every node.
+
+    Nodes that share ``path`` with the head node (NFS) are installed once, by
+    the head node.
 
     The tag is required: CVS pins hva to a release so a CVS release always runs
     the same tests. After the build, ``hva --version`` must report that release.
@@ -68,12 +83,15 @@ def test_install_hva(orch, config_dict):
         update_test_result()
         return
 
-    out_dict = orch.exec(hva_lib.clone_cmd(config_dict['git_url'], path), timeout=300, detailed=True)
+    hosts = _install_hosts(orch, path)
+    log.info('Installing hva at %s on %s', path, ', '.join(hosts))
+
+    out_dict = orch.exec(hva_lib.clone_cmd(config_dict['git_url'], path), hosts=hosts, timeout=300, detailed=True)
     if _fail_nodes(out_dict, 'clone'):
         update_test_result()
         return
 
-    out_dict = orch.exec(hva_lib.checkout_cmd(path, git_tag), timeout=120, detailed=True)
+    out_dict = orch.exec(hva_lib.checkout_cmd(path, git_tag), hosts=hosts, timeout=120, detailed=True)
     if _fail_nodes(out_dict, f'checkout of {git_tag}'):
         update_test_result()
         return
@@ -83,7 +101,7 @@ def test_install_hva(orch, config_dict):
         if actual != git_tag:
             fail_test(f'hva not at git tag {git_tag} on node {node} after checkout (git describe: {actual!r})')
 
-    out_dict = orch.exec(hva_lib.build_cmd(path), timeout=900, detailed=True, print_console=False)
+    out_dict = orch.exec(hva_lib.build_cmd(path), hosts=hosts, timeout=900, detailed=True, print_console=False)
     if _fail_nodes(out_dict, 'build'):
         update_test_result()
         return

@@ -134,7 +134,8 @@
         ]
     },
     "hip_verbs_acceptance": {
-        "path": "/home/{user-id}/INSTALL/hip-verbs-acceptance",
+        "path": "/tmp/{user-id}/INSTALL/hip-verbs-acceptance",
+        "_comment_path": "Node-local by default. A path shared with the head node (NFS) is cloned and built once, by the head node. Two-node verbs runs need hva at the same path on every node.",
         "git_url": "https://github.com/ROCm/hip-verbs-acceptance.git",
         "git_tag": "v0.1.0",
         "_comment_rocm_path": "ROCm tree whose lib/ holds libamdhip64. Leave empty to use the newest /opt/rocm/core-* or /opt/rocm.",

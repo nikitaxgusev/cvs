@@ -37,6 +37,45 @@ def clone_cmd(git_url, path):
     return f"bash -c {_q(f'rm -rf {_q(path)} && git clone -q {_q(git_url)} {_q(path)}')}"
 
 
+def _parent_dir(path):
+    stripped = path.rstrip('/')
+    if '/' not in stripped:
+        return '.'
+    return stripped.rsplit('/', 1)[0] or '/'
+
+
+def _probe_marker(path, token):
+    '''Marker file beside ``path``; ``path`` itself is replaced by the clone.'''
+    return f"{_parent_dir(path).rstrip('/')}/.cvs-hva-probe-{token}"
+
+
+def share_mark_cmd(path, token):
+    '''Create the shared-storage probe marker; run on the head node only.'''
+    inner = f'mkdir -p {_q(_parent_dir(path))} && touch {_q(_probe_marker(path, token))}'
+    return f'bash -c {_q(inner)}'
+
+
+def share_check_cmd(path, token):
+    '''Print ``HVA_SHARED=1`` on nodes that see the head node's marker.'''
+    marker = _probe_marker(path, token)
+    return f"bash -c {_q(f'if test -e {_q(marker)}; then echo HVA_SHARED=1; else echo HVA_SHARED=0; fi')}"
+
+
+def share_clear_cmd(path, token):
+    return f'rm -f {_q(_probe_marker(path, token))}'
+
+
+def install_hosts(hosts, head, check_out):
+    '''Nodes that must clone and build hva.
+
+    A node that sees the head node's marker shares ``path`` with the head, so
+    only the head installs there; a parallel clone and build into one shared
+    directory would race.
+    '''
+    shared = {node for node, out in (check_out or {}).items() if 'HVA_SHARED=1' in (out or '')}
+    return [head] + [node for node in hosts if node != head and node not in shared]
+
+
 def checkout_cmd(path, git_tag):
     '''Check out ``git_tag`` and print the exact tag now at HEAD.'''
     inner = f'cd {_q(path)} && git checkout -q {_q(git_tag)} && git describe --tags --exact-match'
@@ -248,6 +287,23 @@ def verbs_pairs(hosts):
     if len(hosts) % 2:
         pairs.append((hosts[-1], hosts[0]))
     return pairs
+
+
+def verbs_waves(pairs):
+    '''Group pairs into waves in which no node runs twice.
+
+    Pairs of one wave run at the same time. The odd-cluster wrap-around pair
+    reuses the first node, so it runs in a later wave.
+    '''
+    waves = []
+    for pair in pairs:
+        for wave in waves:
+            if not any(node in busy for busy in wave for node in pair):
+                wave.append(pair)
+                break
+        else:
+            waves.append([pair])
+    return waves
 
 
 def node_address(cluster_dict, node):

@@ -7,7 +7,8 @@ HIP/Verbs Acceptance (hva): HIP runtime and RDMA verbs functional tests.
 Run install_hva first. HIP tests run on every node at once. Verbs tests need
 two ranks: on a multi-node cluster each pair of nodes runs one two-node run,
 launched from the first node of the pair, which reaches its peer over ssh at
-the peer's vpc_ip; a single node runs both ranks locally.
+the peer's vpc_ip; a single node runs both ranks locally. All pairs run at the
+same time, except that the wrap-around pair of an odd cluster runs after them.
 '''
 
 import json
@@ -138,26 +139,32 @@ def test_hva_verbs(orch, config_dict, cluster_dict, rocm_path, hva_res_dict, lif
     timeout = int(config_dict.get('verbs_timeout') or _DEFAULT_VERBS_TIMEOUT)
     node_runs = {}
     with timed_stage(lifecycle, 'verbs'):
-        for pair in hva_lib.verbs_pairs(orch.hosts):
-            launcher = pair[0]
-            peer = pair[1] if len(pair) > 1 else None
-            hosts = [hva_lib.node_address(cluster_dict, node) for node in pair] if peer else None
-            cmd = hva_lib.run_cmd(
-                config_dict['path'],
-                rocm_path,
-                'verbs/*',
-                'verbs',
-                ranks=2,
-                hosts=hosts,
-                launch_timeout=timeout - 60 if timeout > 120 else timeout,
-                **_run_kwargs(config_dict),
+        for wave in hva_lib.verbs_waves(hva_lib.verbs_pairs(orch.hosts)):
+            cmds = {}
+            for pair in wave:
+                peer = pair[1] if len(pair) > 1 else None
+                hosts = [hva_lib.node_address(cluster_dict, node) for node in pair] if peer else None
+                cmds[pair[0]] = hva_lib.run_cmd(
+                    config_dict['path'],
+                    rocm_path,
+                    'verbs/*',
+                    'verbs',
+                    ranks=2,
+                    hosts=hosts,
+                    launch_timeout=timeout - 60 if timeout > 120 else timeout,
+                    **_run_kwargs(config_dict),
+                )
+            out_dict = orch.exec_cmd_list(
+                [cmds.get(node, 'true') for node in orch.hosts], timeout=timeout, print_console=False
             )
-            label = f'Verbs with {peer}' if peer else 'Verbs (2 local ranks)'
-            out_dict = orch.exec(cmd, hosts=[launcher], timeout=timeout, print_console=False)
-            parsed = hva_lib.parse_run_output(out_dict.get(launcher, ''))
-            _check_run(launcher, parsed, label)
-            node_runs[launcher] = (parsed, peer)
-            if peer and peer not in node_runs:
-                node_runs[peer] = (parsed, launcher)
+            for pair in wave:
+                launcher = pair[0]
+                peer = pair[1] if len(pair) > 1 else None
+                label = f'Verbs with {peer}' if peer else 'Verbs (2 local ranks)'
+                parsed = hva_lib.parse_run_output(out_dict.get(launcher, ''))
+                _check_run(launcher, parsed, label)
+                node_runs[launcher] = (parsed, peer)
+                if peer and peer not in node_runs:
+                    node_runs[peer] = (parsed, launcher)
     _capture_rundeck(hva_res_dict, cluster_dict, 'verbs', node_runs)
     update_test_result()

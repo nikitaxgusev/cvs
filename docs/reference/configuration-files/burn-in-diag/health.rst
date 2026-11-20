@@ -1,6 +1,6 @@
 .. meta::
   :description: Reference for the CVS health test configuration file, covering AGFHC, TransferBench, RVS, and HIP/Verbs Acceptance parameters for AMD GPU cluster validation.
-  :keywords: CVS, health, AGFHC, TransferBench, RVS, ROCm, GPU, burn-in, AMD Instinct, configuration, JSON, benchmark
+  :keywords: CVS, health, AGFHC, TransferBench, RVS, HIP/Verbs Acceptance, hva, RDMA, verbs, ROCm, GPU, burn-in, AMD Instinct, configuration, JSON, benchmark
 
 ***************************************************************************
 Health test configuration file reference for Cluster Validation Suite (CVS)
@@ -149,7 +149,7 @@ See :doc:`/how-to/test-suites/burn-in-diag/health` for more information on runni
         },
         "hip_verbs_acceptance":
         {
-            "path": "/home/{user-id}/INSTALL/hip-verbs-acceptance",
+            "path": "/tmp/{user-id}/INSTALL/hip-verbs-acceptance",
             "git_url": "https://github.com/ROCm/hip-verbs-acceptance.git",
             "git_tag": "v0.1.0",
             "rocm_path": "",
@@ -443,8 +443,8 @@ HIP/Verbs Acceptance configuration parameters live in the ``hip_verbs_acceptance
      - Default values
      - Description
    * - ``path``
-     - ``/home/{user-id}/INSTALL/hip-verbs-acceptance``
-     - Directory hva is cloned into. ``install_hva`` replaces it and installs hva under ``<path>/install``. Two-node verbs runs need hva at the same path on every node.
+     - ``/tmp/{user-id}/INSTALL/hip-verbs-acceptance``
+     - Directory hva is cloned into. ``install_hva`` replaces it and installs hva under ``<path>/install``. Two-node verbs runs need hva at the same path on every node. The default is node-local; a path the head node shares with other nodes, such as an NFS home directory, is cloned and built once, by the head node.
    * - ``git_url``
      - `https://github.com/ROCm/hip-verbs-acceptance.git <https://github.com/ROCm/hip-verbs-acceptance.git>`_
      - URL for Git repo

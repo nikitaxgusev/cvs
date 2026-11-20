@@ -56,6 +56,34 @@ class TestInstallCommands(unittest.TestCase):
         self.assertEqual(hva_lib.version_cmd('/opt/hva'), '/opt/hva/install/bin/hva --version')
 
 
+class TestSharedPathProbe(unittest.TestCase):
+    def test_marker_sits_beside_path(self):
+        mark = _inner(hva_lib.share_mark_cmd('/home/u/INSTALL/hva/', 'tok'))
+        self.assertIn('mkdir -p /home/u/INSTALL', mark)
+        self.assertIn('touch /home/u/INSTALL/.cvs-hva-probe-tok', mark)
+        self.assertIn(
+            'test -e /home/u/INSTALL/.cvs-hva-probe-tok', _inner(hva_lib.share_check_cmd('/home/u/INSTALL/hva', 'tok'))
+        )
+        self.assertEqual(
+            hva_lib.share_clear_cmd('/home/u/INSTALL/hva', 'tok'), 'rm -f /home/u/INSTALL/.cvs-hva-probe-tok'
+        )
+
+    def test_marker_under_root_and_relative_paths(self):
+        self.assertIn('touch /.cvs-hva-probe-tok', _inner(hva_lib.share_mark_cmd('/hva', 'tok')))
+        self.assertIn('touch ./.cvs-hva-probe-tok', _inner(hva_lib.share_mark_cmd('hva', 'tok')))
+
+    def test_shared_nodes_are_installed_by_head(self):
+        check = {'n1': 'HVA_SHARED=1\n', 'n2': 'HVA_SHARED=1\n', 'n3': 'HVA_SHARED=0\n'}
+        self.assertEqual(hva_lib.install_hosts(['n1', 'n2', 'n3'], 'n1', check), ['n1', 'n3'])
+
+    def test_node_local_path_installs_everywhere(self):
+        check = {'n1': 'HVA_SHARED=1\n', 'n2': 'HVA_SHARED=0\n'}
+        self.assertEqual(hva_lib.install_hosts(['n1', 'n2'], 'n1', check), ['n1', 'n2'])
+
+    def test_missing_probe_output_installs(self):
+        self.assertEqual(hva_lib.install_hosts(['n1', 'n2'], 'n1', {}), ['n1', 'n2'])
+
+
 class TestVersion(unittest.TestCase):
     def test_parse_version(self):
         self.assertEqual(hva_lib.parse_version('hva 0.1.0 (git 8cfe768)\n'), ('0.1.0', '8cfe768'))
@@ -217,6 +245,22 @@ class TestVerbsPairs(unittest.TestCase):
 
     def test_odd_last_pairs_with_first(self):
         self.assertEqual(hva_lib.verbs_pairs(['n1', 'n2', 'n3']), [('n1', 'n2'), ('n3', 'n1')])
+
+
+class TestVerbsWaves(unittest.TestCase):
+    def test_disjoint_pairs_share_one_wave(self):
+        pairs = hva_lib.verbs_pairs(['n1', 'n2', 'n3', 'n4'])
+        self.assertEqual(hva_lib.verbs_waves(pairs), [[('n1', 'n2'), ('n3', 'n4')]])
+
+    def test_wrap_around_pair_runs_later(self):
+        pairs = hva_lib.verbs_pairs(['n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(hva_lib.verbs_waves(pairs), [[('n1', 'n2'), ('n3', 'n4')], [('n5', 'n1')]])
+
+    def test_single_node(self):
+        self.assertEqual(hva_lib.verbs_waves([('n1',)]), [[('n1',)]])
+
+    def test_no_pairs(self):
+        self.assertEqual(hva_lib.verbs_waves([]), [])
 
 
 class TestNodeAddress(unittest.TestCase):
